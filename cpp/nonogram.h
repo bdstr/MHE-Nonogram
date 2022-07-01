@@ -15,6 +15,7 @@ public:
   int height;
   std::vector<std::vector<int>> hints_vertical;
   std::vector<std::vector<int>> hints_horizontal;
+  std::vector<bool> seed;
 
   Nonogram(int Width, int Height);
   Nonogram(int Width, int Height, std::vector<bool> Seed);
@@ -28,7 +29,6 @@ public:
   bool operator!=(const Nonogram &Rhs) const;
 
 private:
-  std::vector<bool> seed;
   int max_score = 0;
 
   std::vector<bool> number_to_seed(unsigned long long hex);
