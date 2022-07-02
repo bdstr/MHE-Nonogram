@@ -123,7 +123,7 @@ int main(int argc, char **argv) {
   auto method = arg(argc, argv, "method", std::string("hillclimb_deterministic"));
   auto print_result = arg(argc, argv, "print_result", std::string("true"));
 
-  auto tabu_size = arg(argc, argv, "tabu_size", 200);
+  auto tabu_size = arg(argc, argv, "tabu_size", 100);
   auto initial_temp = arg(argc, argv, "initial_temp", 20);
   auto tries_in_epoque = arg(argc, argv, "tries_in_epoque", 15);
 
@@ -136,7 +136,7 @@ int main(int argc, char **argv) {
   auto migration_pause = arg(argc, argv, "migration_pause", 5);
 
   auto crossover_func_arg = arg(argc, argv, "crossover_func", std::string("single_point_crossover"));
-  std::function< std::tuple<Nonogram, Nonogram>(Nonogram a, Nonogram b)> crossover_func;
+  std::function<std::tuple<Nonogram, Nonogram>(Nonogram a, Nonogram b)> crossover_func;
   if (crossover_func_arg == "single_point_crossover") {
 	crossover_func = GeneticAlgorithmsFunctions::single_point_crossover;
   } else if (crossover_func_arg == "double_point_crossover") {
