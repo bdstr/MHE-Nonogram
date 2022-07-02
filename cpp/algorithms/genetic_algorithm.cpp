@@ -1,6 +1,8 @@
 #include <tuple>
 #include "genetic_algorithm.h"
 #include "../utils/random.h"
+#include <algorithm>
+#include <execution>
 
 GeneticAlgorithm::GeneticAlgorithm(Nonogram target,
 								   int initial_population_size,
@@ -50,18 +52,35 @@ void GeneticAlgorithm::next_generation() {
 
 std::vector<Nonogram> GeneticAlgorithm::generate_population(int size) {
   std::vector<Nonogram> population;
+  std::vector<bool> iterator;
   for (int i = 0; i < size; i++) {
-	population.push_back(Nonogram(this->target.width, this->target.height));
+	iterator.push_back(true);
   }
+
+  std::for_each(std::execution::par, iterator.begin(), iterator.end(), [&](bool item) {
+	population.push_back(Nonogram(this->target.width, this->target.height));
+  });
+//  for (int i = 0; i < size; i++) {
+//	population.push_back(Nonogram(this->target.width, this->target.height));
+//  }
   return population;
 }
 
+//std::vector<std::tuple<Nonogram, int>> GeneticAlgorithm::score_population(std::vector<Nonogram> population) {
+//  std::vector<std::tuple<Nonogram, int>> population_with_scores;
+//  for (int i = 0; i < population.size(); i++) {
+//	population_with_scores.push_back(std::make_tuple(population[i],
+//													 this->target.calculate_fitness_score(population[i])));
+//  }
+//  return population_with_scores;
+//}
+
 std::vector<std::tuple<Nonogram, int>> GeneticAlgorithm::score_population(std::vector<Nonogram> population) {
   std::vector<std::tuple<Nonogram, int>> population_with_scores;
-  for (int i = 0; i < population.size(); i++) {
-	population_with_scores.push_back(std::make_tuple(population[i],
-													 this->target.calculate_fitness_score(population[i])));
-  }
+  std::for_each(std::execution::par, population.begin(), population.end(), [&](Nonogram item) {
+	population_with_scores.push_back(std::make_tuple(item,
+													 this->target.calculate_fitness_score(item)));
+  });
   return population_with_scores;
 }
 
@@ -92,16 +111,31 @@ std::vector<Nonogram> GeneticAlgorithm::crossover_population(std::vector<Nonogra
   return children;
 }
 
+//std::vector<Nonogram> GeneticAlgorithm::mutate_population(std::vector<Nonogram> population) {
+//  Random<int> random;
+//  std::vector<Nonogram> mutated_population;
+//  for (int i = 0; i < population.size(); i++) {
+//	if (random.generate(0, 100) < this->mutation_chance_percent) {
+//	  mutated_population.push_back(this->mutation_function(population[i]));
+//	} else {
+//	  mutated_population.push_back(population[i]);
+//	}
+//  }
+//  return mutated_population;
+//}
+
+
 std::vector<Nonogram> GeneticAlgorithm::mutate_population(std::vector<Nonogram> population) {
   Random<int> random;
   std::vector<Nonogram> mutated_population;
-  for (int i = 0; i < population.size(); i++) {
+  std::for_each(std::execution::par, population.begin(), population.end(), [&](Nonogram item) {
 	if (random.generate(0, 100) < this->mutation_chance_percent) {
-	  mutated_population.push_back(this->mutation_function(population[i]));
+	  mutated_population.push_back(this->mutation_function(item));
 	} else {
-	  mutated_population.push_back(population[i]);
+	  mutated_population.push_back(item);
 	}
-  }
+  });
+
   return mutated_population;
 }
 
