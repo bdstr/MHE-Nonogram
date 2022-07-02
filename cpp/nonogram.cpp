@@ -21,11 +21,16 @@ Nonogram::Nonogram(int Width, int Height, unsigned long long Seed)
 }
 
 bool Nonogram::operator==(const Nonogram &Rhs) const {
-  return width == Rhs.width &&
-	  height == Rhs.height &&
-	  hints_vertical == Rhs.hints_vertical &&
-	  hints_horizontal == Rhs.hints_horizontal &&
-	  seed == Rhs.seed;
+  if (width == Rhs.width &&
+	  height == Rhs.height) {
+	for (int i = 0; i < seed.size(); i++) {
+	  if (seed[i] != Rhs.seed[i]) {
+		return false;
+	  }
+	}
+	return true;
+  }
+  return false;
 }
 bool Nonogram::operator!=(const Nonogram &Rhs) const {
   return !(Rhs == *this);

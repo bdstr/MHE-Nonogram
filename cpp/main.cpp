@@ -115,15 +115,19 @@ int main(int argc, char **argv) {
   using namespace std;
 
 //  auto hex_seed = arg(argc, argv, "target", (unsigned long long)(0x1555555));
-  auto hex_seed = arg(argc, argv, "target", (unsigned long long)(0x843D48));
-  auto iterations = arg(argc, argv, "iterations", 1000);
+  auto hex_seed = arg(argc, argv, "target", (unsigned long long)(0x87A988));
+  auto width = arg(argc, argv, "width", 5);
+  auto height = arg(argc, argv, "height", 5);
+
+  auto iterations = arg(argc, argv, "iterations", 500);
   auto method = arg(argc, argv, "method", std::string("hillclimb_deterministic"));
+  auto print_result = arg(argc, argv, "print_result", std::string("true"));
 
-  auto tabu_size = arg(argc, argv, "tabu_size", 100);
-  auto initial_temp = arg(argc, argv, "initial_temp", 100);
-  auto tries_in_epoque = arg(argc, argv, "tries_in_epoque", 10);
+  auto tabu_size = arg(argc, argv, "tabu_size", 200);
+  auto initial_temp = arg(argc, argv, "initial_temp", 20);
+  auto tries_in_epoque = arg(argc, argv, "tries_in_epoque", 15);
 
-  auto pop_size = arg(argc, argv, "pop_size", 100);
+  auto pop_size = arg(argc, argv, "pop_size", 500);
   auto crossover_p = arg(argc, argv, "crossover_p", 0.9);
   auto mutation_p = arg(argc, argv, "mutation_p", 10);
 
@@ -131,15 +135,15 @@ int main(int argc, char **argv) {
   auto migration_speed = arg(argc, argv, "migration_speed", 10);
   auto migration_pause = arg(argc, argv, "migration_pause", 5);
 
-  auto crossover_func_arg = arg(argc, argv, "crossover_func", "double_point_crossover");
-  std::function<std::tuple<Nonogram, Nonogram>(Nonogram a, Nonogram b)> crossover_func;
-  if (crossover_func_arg == "single_point_crossover""") {
+  auto crossover_func_arg = arg(argc, argv, "crossover_func", std::string("single_point_crossover"));
+  std::function< std::tuple<Nonogram, Nonogram>(Nonogram a, Nonogram b)> crossover_func;
+  if (crossover_func_arg == "single_point_crossover") {
 	crossover_func = GeneticAlgorithmsFunctions::single_point_crossover;
-  } else if (crossover_func_arg == "double_point_crossover""") {
+  } else if (crossover_func_arg == "double_point_crossover") {
 	crossover_func = GeneticAlgorithmsFunctions::double_point_crossover;
   }
 
-  auto mutation_func_arg = arg(argc, argv, "mutation_func", "mutate_single_bit");
+  auto mutation_func_arg = arg(argc, argv, "mutation_func", std::string("mutate_single_bit"));
   std::function<Nonogram(Nonogram)> mutation_func;
   if (mutation_func_arg == "mutate_single_bit") {
 	mutation_func = GeneticAlgorithmsFunctions::mutate_single_bit;
@@ -147,52 +151,55 @@ int main(int argc, char **argv) {
 	mutation_func = GeneticAlgorithmsFunctions::mutate_scramble;
   }
 
-  auto terminate_condition_arg = arg(argc, argv, "terminate_condition_func", "terminate_iterations");
+  auto terminate_condition_arg = arg(argc, argv, "terminate_condition_func", std::string("terminate_iterations"));
   std::function<bool(GeneticAlgorithm ga)> terminate_condition_func;
   if (terminate_condition_arg == "terminate_iterations") {
 	terminate_condition_func = GeneticAlgorithmsFunctions::terminate_condition_iterations;
-  } else if (terminate_condition_arg == "terminate_scor_not_changing") {
+  } else if (terminate_condition_arg == "terminate_score_not_changing") {
 	terminate_condition_func = GeneticAlgorithmsFunctions::terminate_condition_score_has_not_changed;
   }
 
   cout << "Target:" << std::endl;
-  Nonogram target(5, 5, hex_seed);
+  Nonogram target(width, height, hex_seed);
   target.print();
+  cout << std::endl;
 
   TimeMeasure time_measure;
+  int best_score = 0;
+  int time = 0;
 
   if (method == "hillclimb_deterministic") {
 	HillClimbingAlgorithm hill_climbing_algorithm(target);
 	std::cout << "Hill Climbing Deterministic Algorithm" << std::endl;
 	time_measure.start();
 	std::tuple<Nonogram, int> hca_deterministic_result = hill_climbing_algorithm.run_deterministic(iterations);
-	std::cout << "Time: " << time_measure.stop() << "ms" << std::endl;
+	time = time_measure.stop();
+	best_score = get<1>(hca_deterministic_result);
 	get<0>(hca_deterministic_result).print();
-	std::cout << "Score: " << get<1>(hca_deterministic_result) << std::endl << std::endl;
   } else if (method == "hillclimb_stochastic") {
 	HillClimbingAlgorithm hill_climbing_algorithm(target);
 	std::cout << "Hill Climbing Stochastic Algorithm" << std::endl;
 	time_measure.start();
 	std::tuple<Nonogram, int> hca_stochastic_result = hill_climbing_algorithm.run_stochastic(iterations);
-	std::cout << "Time: " << time_measure.stop() << "ms" << std::endl;
+	time = time_measure.stop();
+	best_score = get<1>(hca_stochastic_result);
 	get<0>(hca_stochastic_result).print();
-	std::cout << "Score: " << get<1>(hca_stochastic_result) << std::endl << std::endl;
   } else if (method == "tabu") {
 	TabuAlgorithm tabu_algorithm(target);
 	std::cout << "Tabu Algorithm" << std::endl;
 	time_measure.start();
 	std::tuple<Nonogram, int> tabu_result = tabu_algorithm.run(iterations, tabu_size);
-	std::cout << "Time: " << time_measure.stop() << "ms" << std::endl;
+	time = time_measure.stop();
+	best_score = get<1>(tabu_result);
 	get<0>(tabu_result).print();
-	std::cout << "Score: " << get<1>(tabu_result) << std::endl << std::endl;
   } else if (method == "simulated_annealing") {
 	SimulatedAnnealingAlgorithm simulated_annealing_algorithm(target);
 	std::cout << "Simulated Annealing Algorithm" << std::endl;
 	time_measure.start();
 	std::tuple<Nonogram, int> saa_result = simulated_annealing_algorithm.run(initial_temp, tries_in_epoque, iterations);
-	std::cout << "Time: " << time_measure.stop() << "ms" << std::endl;
+	time = time_measure.stop();
+	best_score = get<1>(saa_result);
 	get<0>(saa_result).print();
-	std::cout << "Score: " << get<1>(saa_result) << std::endl << std::endl;
   } else if (method == "genetic_algorithm") {
 	std::cout << "Genetic Algorithm" << std::endl;
 	GeneticAlgorithm genetic_algorithm(target,
@@ -204,9 +211,9 @@ int main(int argc, char **argv) {
 									   terminate_condition_func);
 	time_measure.start();
 	std::tuple<Nonogram, int> ga_result = genetic_algorithm.run();
-	std::cout << "Time: " << time_measure.stop() << "ms" << std::endl;
+	time = time_measure.stop();
+	best_score = get<1>(ga_result);
 	get<0>(ga_result).print();
-	std::cout << "Score: " << get<1>(ga_result) << std::endl << std::endl;
   } else if (method == "island_genetic_algorithm") {
 	std::cout << "Islands Genetic Algorithm" << std::endl;
 	IslandsGeneticAlgorithm islands_genetic_algorithm(islands_count, migration_speed, migration_pause,
@@ -219,12 +226,17 @@ int main(int argc, char **argv) {
 													  terminate_condition_func);
 	time_measure.start();
 	std::tuple<Nonogram, int> islands_ga_result = islands_genetic_algorithm.run(iterations);
-	std::cout << "Time: " << time_measure.stop() << "ms" << std::endl;
+	time = time_measure.stop();
+	best_score = get<1>(islands_ga_result);
 	get<0>(islands_ga_result).print();
-	std::cout << "Score: " << get<1>(islands_ga_result) << std::endl << std::endl;
   } else {
 	std::cerr << "unknown method" << std::endl;
   }
 
-  return 0;
+  if (print_result == "true") {
+	std::cout << "Time: " << time << "ms" << std::endl;
+	std::cout << "Score: " << best_score << std::endl << std::endl;
+  }
+
+  return best_score;
 }

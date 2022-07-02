@@ -12,6 +12,7 @@ public:
   std::tuple<Nonogram, int> run(int iterations, int max_size);
 private:
   Nonogram target;
+  bool is_nonogram_in_list(Nonogram nonogram, std::vector<Nonogram> tabu_list);
 };
 
 #endif //NONOGRAM_CPP_ALGORITHMS_TABU_ALGORITHM_H
