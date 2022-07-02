@@ -15,9 +15,13 @@ public:
 				   std::function<bool(GeneticAlgorithm ga)> termination_function);
   std::tuple<Nonogram, int> run();
 
+  void next_generation();
+  std::tuple<Nonogram, int> find_best_child();
+
   int current_iteration;
   int max_iterations;
   std::vector<int> average_scores;
+  std::vector<std::tuple<Nonogram, int>> population_with_scores;
 private:
   Nonogram target;
   int initial_population_size;
@@ -34,12 +38,6 @@ private:
   std::vector<Nonogram> mutate_population(std::vector<Nonogram> population);
   int calculate_average_population_score(std::vector<std::tuple<Nonogram,
 																int>> scored_population);
-  std::tuple<Nonogram, int> find_best_child(std::vector<std::tuple<Nonogram, int>> scored_population);
-
-  void score_population_thread(std::vector<Nonogram> &population,
-							   std::vector<std::tuple<Nonogram, int>> &population_with_scores,
-							   int i
-  );
 
 };
 

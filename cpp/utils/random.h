@@ -11,13 +11,14 @@ public:
   T generate(T from, T to);
   T generate_floating(T from, T to);
 private:
-  std::random_device random_device;
+  std::random_device r;
   std::mt19937 generator;
 };
 
 template<typename T>
-Random<T>::Random(): generator(random_device()) {
-  generator.seed(::time(NULL));
+Random<T>::Random() {
+  std::seed_seq seed{r(), r(), r(), r(), r(), r(), r(), r()};
+  generator.seed(seed);
 }
 
 template<typename T>
