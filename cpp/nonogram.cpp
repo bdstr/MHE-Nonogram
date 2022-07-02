@@ -150,7 +150,7 @@ void Nonogram::calculate_hints() {
 		if (y == 0 || this->seed[(y - 1) * this->width + x] == false) {
 		  hints_y[x].push_back(1);
 		} else {
-		  hints_y[x][hints_y.size() - 1] = hints_y[x][hints_y.size() - 1] + 1;
+		  hints_y[x][hints_y[x].size() - 1] = hints_y[x][hints_y[x].size() - 1] + 1;
 		}
 	  }
 	}
@@ -168,7 +168,7 @@ void Nonogram::calculate_hints() {
 		if (x == 0 || seed[y * this->width + x - 1] == false) {
 		  hints_x[y].push_back(1);
 		} else {
-		  hints_x[y][hints_x.size() - 1] = hints_x[y][hints_x.size() - 1] + 1;
+		  hints_x[y][hints_x[y].size() - 1] = hints_x[y][hints_x[y].size() - 1] + 1;
 		}
 	  }
 	}
